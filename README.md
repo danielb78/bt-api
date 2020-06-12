@@ -1,8 +1,18 @@
 # BT API
 
-Laravel is wrote with [Laravel](https://laravel.com/docs)
+This App is wrote with [Laravel](https://laravel.com/docs)
+
+## Install Section
+
+``composer install`` - it will install the vendors
 
 ## Docker Section
-## Test
 
-Run ``dc-r exec testapp phpunit``
+### Run in Docker environment
+
+``docker-compose up -d`` - this command will generate images and containers
+
+
+### Test
+
+``dc-r exec testapp phpunit`` - test APIs
