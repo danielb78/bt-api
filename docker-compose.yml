@@ -1,0 +1,84 @@
+version: "3"
+services:
+  app:
+    image: bt-www
+    container_name: bt-www
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    depends_on:
+      - redis
+      - mysql
+    env_file:
+      - .envs/dev/.env.app
+    volumes:
+      - .:/var/www/html
+    ports:
+      - 80:80
+    environment:
+      CONTAINER_ROLE: app
+    networks:
+      - bt-tier
+
+  redis:
+    container_name: bt-redis
+    image: redis:4-alpine
+    privileged: true
+    sysctls:
+      net.core.somaxconn: '511'
+    ports:
+      - 6379:6379
+    volumes:
+      - btredis:/data
+    networks:
+      - bt-tier
+
+  mysql:
+    container_name: bt-mysql
+    image: mysql:5.7.24
+    ports:
+      - 3306:3306
+    volumes:
+      - btmysqldb:/var/lib/mysql
+    env_file:
+      - .envs/dev/.env.mysql
+    networks:
+      - bt-tier
+
+  testapp:
+    container_name: bt-testapp
+    image: bt-www
+    depends_on:
+      - app
+      - mysqltest
+    env_file:
+      - .envs/dev/.env.testapp
+    volumes:
+      - .:/var/www/html
+    ports:
+      - 8080:80
+    environment:
+      CONTAINER_ROLE: app
+    networks:
+      - bt-tier
+
+  mysqltest:
+    container_name: bt-testmysql
+    tmpfs: /var/lib/mysql
+    image: mysql:5.7.24
+    ports:
+      - 3307:3306
+    env_file:
+      - .envs/dev/.env.mysql
+    networks:
+      - bt-tier
+
+volumes:
+  btredis:
+    driver: "local"
+  btmysqldb:
+    driver: "local"
+
+networks:
+  bt-tier:
+    driver: bridge
